@@ -9,24 +9,30 @@ function getRandomArrayElements (arr){
   return arr.slice(0, getRandomNumber(1, arr.length));
 }
 
-function getrandomUniqueValue (arr, countNumbermin, countNumbermax) {
-  let nextValue;
-  while (arr.length < 25) {
-    nextValue = getRandomNumber (countNumbermin, countNumbermax);
-    if (!arr.includes(nextValue)) {
-      arr.push(nextValue);
-      return nextValue;
+function getrandomUniqueValue (min, max) {
+  const previousValues = [];
+
+  return function () {
+    let currentValue = getRandomNumber (min, max);
+    if (previousValues.length >= (max - min + 1)) {
+      throw new Error(`Перебраны все числа из диапазона от ' + ${min} + ' до ' + ${max}`);
     }
-  }
+    while (previousValues.includes(currentValue)) {
+      currentValue = getRandomNumber (min, max);
+    }
+    previousValues.push(currentValue);
+    return currentValue;
+  };
 }
 
-const randomUniqueIdPhotos = [];
-const randomUniqueUrlPhotos = [];
-const randomUniqueIdPhotoComments = [];
+const randomUniqueIdPhoto = getrandomUniqueValue(1, 26);
+const randomUniqueUrlPhoto = getrandomUniqueValue(1, 26);
+const randomUniqueIdPhotoComment = getrandomUniqueValue (110, 150);
 
 function getAvatarPhoto () {
   return `img/avatar-${getRandomNumber (1, 6)}.svg`;
 }
+
 
 const descriptions = ['Классная фотография', 'Хорошая фотография', 'Отличная фотография'];
 
@@ -39,14 +45,14 @@ const massages = ['Всё отлично!',
 
 const names = ['Анастасия', 'Константин', 'Владислав', 'Маргарита', 'Дмитрий'];
 
-function createData () {
+function createPost () {
   return {
-    id: getrandomUniqueValue (randomUniqueIdPhotos, 1, 25),
-    url: `photos/${getrandomUniqueValue (randomUniqueUrlPhotos, 1, 25)}.jpg`,
-    description: getRandomArrayElement(descriptions),
-    likes: getRandomNumber(15, 200),
+    id: randomUniqueIdPhoto (),
+    url: `photos/${randomUniqueUrlPhoto ()}.jpg`,
+    description: getRandomArrayElement (descriptions),
+    likes: getRandomNumber (15, 200),
     comments: [
-      {id: getrandomUniqueValue (randomUniqueIdPhotoComments, 110, 150)},
+      {id: randomUniqueIdPhotoComment ()},
       {avatar: getAvatarPhoto ()},
       {message: getRandomArrayElements (massages)},
       {name: getRandomArrayElement (names)},
@@ -54,6 +60,6 @@ function createData () {
   };
 }
 
-const createDatas = Array.from({length: 25}, createData);
+const createPosts = Array.from({length: 26}, createPost);
 
-export {createDatas};
+export {createPosts};
